@@ -248,6 +248,23 @@
    (require 'gradle-mode)
    (gradle-mode 1)
    #+end_src
+
+** company mode
+   Frontend to intelligent completion ("complete any"), with support
+   for many backends.
+
+   Tweak the keybindings:
+   #+begin_src emacs-lisp
+     (define-key company-active-map [tab] 'company-complete-selection)
+     (define-key company-active-map (kbd "TAB") 'company-complete-selection)
+     (define-key company-active-map [return] nil)
+     (define-key company-active-map (kbd "RET") nil)
+     (define-key company-active-map (kbd "M-h") 'company-show-doc-buffer)
+   #+end_src
+   
+** exec-path-from-shell
+   Just needed on the Mac in order to properly get environment
+   variables in the Emacs shell.
    
 * Interface
   :PROPERTIES:

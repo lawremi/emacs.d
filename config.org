@@ -480,13 +480,19 @@
 
   Make it easier to see the current line:
   #+begin_src emacs-lisp
-  ;; highlight current line
   (global-hl-line-mode)
   #+end_src
   
   Configure the font:
   #+begin_src emacs-lisp
-    (set-default-font "Bitstream Vera Sans Mono-10")
+    (if (memq window-system '(mac ns))
+        (set-default-font "Inconsolata-14")
+      (set-default-font "Bitstream Vera Sans Mono-10"))
+  #+end_src
+
+  Show matching parentheses:
+  #+begin_src emacs-lisp
+  (show-paren-mode 1)
   #+end_src
   
 * Buffer management

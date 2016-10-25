@@ -68,6 +68,21 @@
      (require 'wgrep-helm)
      (setq wgrep-auto-save-buffer t)
    #+end_src
+
+   Pressing return on a grep result should move the focus to the match:
+   #+begin_src emacs-lisp
+     (define-key helm-grep-mode-map
+       (kbd "<return>") 'helm-grep-mode-jump-other-window)
+   #+end_src
+
+   Since we use the meta key for window movement, we need to use the
+   super key for navigating helm grep results:
+   #+begin_src emacs-lisp
+     (define-key helm-grep-mode-map (kbd "<s-down>") 'helm-gm-next-file)
+     (define-key helm-grep-mode-map (kbd "<M-down>") nil)
+     (define-key helm-grep-mode-map (kbd "<s-up>") 'helm-gm-precedent-file)
+     (define-key helm-grep-mode-map (kbd "<M-up>") nil)
+   #+end_src
    
 ** Projectile
    Detects projects when a buffer inside a version-controlled

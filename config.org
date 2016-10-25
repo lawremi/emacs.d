@@ -873,22 +873,12 @@
                (org-id-get-with-outline-path-completion org-refile-targets)))
    #+end_src
 
-   Integrate org-mode with reftex for easily adding bibtex references:
+   Add latex and markdown export support:
    #+begin_src emacs-lisp
-     (defun org-mode-reftex-setup ()
-       (load-library "reftex")
-       (and (buffer-file-name)
-            (file-exists-p (buffer-file-name))
-            (reftex-parse-all))
-       (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
-       )
-     (add-hook 'org-mode-hook 'org-mode-reftex-setup)
-
-     (require 'ox-bibtex)
+     (require 'ox-latex)
+     (require 'ox-md)
    #+end_src
    
-*** TODO Use org-dotemacs to implement this file
-    
 ** Literate programming
    The org-babel module lets us interweave code and prose.
    #+begin_src emacs-lisp

@@ -1010,12 +1010,7 @@
   
 ** Capture
    The goal is an efficient mechanism for dumping "stuff" into a bin
-   for later processing. The =org-capture= module implements this, and
-   we define a global keybinding that lets us capture arbitrary
-   information from anywhere:
-   #+begin_src emacs-lisp
-     (define-key global-map [(super c)] 'org-capture)
-   #+end_src
+   for later processing. The =org-capture= module implements this.
 
    We want to streamline entry for the most common ways we encounter
    stuff, including:

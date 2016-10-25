@@ -464,9 +464,9 @@
   clean theme, as well as language-specific features like syntax
   highlighting.
 
-  Enable the Solarized "light" theme ("dark" is equally good):
+  Enable the Solarized "dark" theme ("light" is equally good):
   #+begin_src emacs-lisp
-  (load-theme 'solarized-light t)
+  (load-theme 'solarized-dark t)
   #+end_src
   
   Enable syntax-highlighting:

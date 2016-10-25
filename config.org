@@ -500,7 +500,14 @@
   (global-set-key (kbd "C-w") 'kill-this-buffer)
   (global-set-key (kbd "s-w") 'projectile-kill-buffers)
   #+end_src
-  
+
+  Every buffer name should be unique, even if the files have the same
+  name. Emacs has built-in functionality for uniquifying buffer
+  names. We prefer using the parent path:
+  #+begin_src emacs-lisp
+  (setq uniquify-buffer-name-style 'forward)
+  #+end_src
+
 * File management
 ** File operations
    We have already reviewed opening files. In addition, we can save

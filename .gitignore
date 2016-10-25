@@ -1,0 +1,15 @@
+/.org-id-locations
+/abbrev_defs
+/auto-save-list
+/bookmarks
+/config.el
+*~
+elpa
+network-security.data
+/org-gcal
+/packages.el
+/projectile-bookmarks.eld
+/projectile.cache
+/recentf
+session.*
+src

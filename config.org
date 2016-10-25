@@ -1,0 +1,1222 @@
+#+TITLE: Cultivating Emacs
+
+#+PROPERTY: header-args :results none
+* Prelude
+  The intent of this document is to organize an Emacs configuration in
+  order to highlight the important features of a code editor. The
+  details, such as particular key-bindings, are personal preferences.
+
+* Packages
+** Installation
+  In order to actually find useful packages, we need to configure the
+  major repositories:
+  #+begin_src emacs-lisp
+    (setq package-archives '(("MELPA" . "http://melpa.org/packages/")
+                             ("gnu" . "http://elpa.gnu.org/packages/")
+                             ("marmalade" . "http://marmalade-repo.org/packages/")
+                             ("SC"   .
+                              "http://joseito.republika.pl/sunrise-commander/")
+                             ("org" . "http://orgmode.org/elpa/"))
+          )
+  #+end_src
+  
+  The following describes each package we have installed.
+  
+** Helm
+   Perhaps the most generall useful Emacs package, Helm makes it easy
+   to find anything, and to perform operations in batch over search
+   results.
+
+   #+begin_src emacs-lisp
+     (require 'helm)
+     (require 'helm-config)
+   #+end_src
+
+   Enable helm for "everything":
+   #+begin_src emacs-lisp
+   (helm-mode 1)
+   #+end_src
+   
+   Some UI tweaks:
+   #+begin_src emacs-lisp
+     (setq helm-split-window-in-side-p           t
+           helm-move-to-line-cycle-in-source     t)
+   #+end_src
+   
+   These settings make helm more similar to other completion
+   interfaces, where the tab completes:
+   #+begin_src emacs-lisp
+   (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+   (define-key helm-map (kbd "C-z")  'helm-select-action)
+   #+end_src
+   
+   Global keybindings to go helming for things:
+   #+begin_src emacs-lisp
+     (global-set-key (kbd "M-x") 'helm-M-x)
+     (global-set-key (kbd "M-m") 'helm-all-mark-rings)
+   #+end_src
+
+   Once we jump to a result, the result list is discarded. This can be
+   painful when performing a complex query. The =helm-resume= command
+   gives us the results back:
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "M-h") 'helm-resume)
+   #+end_src
+   
+   Lets us write (find/replace) in helm-grep buffers:
+   #+begin_src emacs-lisp
+     (require 'wgrep-helm)
+     (setq wgrep-auto-save-buffer t)
+   #+end_src
+   
+** Projectile
+   Detects projects when a buffer inside a version-controlled
+   directory is visited. Provides facilities for operating over all
+   files within a project, including opening, searching, indexing,
+   closing, etc.
+
+   #+begin_src emacs-lisp
+     (projectile-global-mode)
+     (setq projectile-completion-system 'helm)
+     (setq projectile-enable-caching t)
+   #+end_src
+
+** Helm-projectile
+   Integrates Helm with Projectile to enable Helm-style searching
+   through projects.
+   #+begin_src emacs-lisp
+     (require 'helm-projectile)
+     (helm-projectile-on)
+     (setq projectile-switch-project-action 'helm-projectile-find-file)
+   #+end_src
+   
+** org-projectile
+   Integrates org-mode with projectile, providing shortcuts for
+   capturing TODOs associated with projectile projects.
+
+   #+begin_src emacs-lisp
+   (require 'org-projectile)
+   #+end_src
+   
+** ggtags
+   Lets Emacs (including helm-projectile) search GNU Global symbol
+   databases. We have a package, rgtags, that generates tags for R. It
+   provides a plugin for GNU Global, but the plugin is designed to be
+   run from within the R process. We might need an update macro that
+   uses ESS to update tags.
+
+** ESS
+   ESS embeds R into Emacs.
+   
+** Magit
+   Git integration. Some people use Emacs just for this package.
+
+   Avoid nag instructions:
+   #+begin_src emacs-lisp
+   (setq magit-last-seen-setup-instructions "1.4.0")
+   #+end_src
+
+   We also installed the magithub package for GitHub integration
+   (create forks, submit pull requests, manage issues).
+   #+begin_src emacs-lisp
+   (require 'magithub)
+   #+end_src
+
+   We also load github-search to find and clone repositories. Can then
+   fork using magithub.
+   #+begin_src emacs-lisp
+   (require 'github-search)
+   #+end_src
+   
+** diff-hl
+   Highlight uncommitted changes in the gutter and makes it easy to
+   revert them.
+   #+begin_src emacs-lisp
+   (global-diff-hl-mode)
+   #+end_src
+   
+** org-gcal
+   For syncing Google Calendar with an org-mode file.
+   #+begin_src emacs-lisp
+     (require 'org-gcal)
+     (setq org-gcal-client-id "706907592689-jhil8k3v8lpuod2b1323hcg5g2o993ud.apps.googleusercontent.com"
+           org-gcal-client-secret "7xygDl6RTtfb28qzj7Wt4EXw"
+           org-gcal-file-alist '(("michafla@gene.com" .  "~/org/gcal.org")))
+   #+end_src
+
+** helm-bibtex
+   Makes it easy to find and populate references.
+   
+   Configure paths:
+   #+begin_src emacs-lisp
+     (setq bibtex-completion-bibliography "~/bib/references.bib"
+           bibtex-completion-library-path "~/bib/pdfs"
+           bibtex-completion-notes-path "~/bib/notes.org")
+     (setq bibtex-completion-pdf-open-function 'org-open-file)
+   #+end_src
+   
+** org-ref
+   Almost magical package for populating a BibTeX file and adding,
+   viewing and manipulating labels and references in org-mode. We can
+   populate a bibtex file by drag-n-drop of PDFs (with embedded doi)
+   and certain URLs. PDFs are automatically downloaded and stored. Can
+   also manually enter DOIs and crossref queries. There is an analysis
+   mode for finding and fixing broken references.
+
+   #+begin_src emacs-lisp
+   (require 'org-ref)
+   #+end_src
+   
+   We configure the paths so that everything ends up where
+   helm-bibtex will find it:
+   #+begin_src emacs-lisp
+     (setq reftex-default-bibliography '("~/bib/references.bib"))
+     (setq org-ref-bibliography-notes "~/bib/notes.org"
+           org-ref-default-bibliography '("~/bib/references.bib")
+           org-ref-pdf-directory "~/bib/pdfs/")
+   #+end_src
+   
+** AUCTeX
+   Facilities for authoring LaTeX files. Fancy fontification,
+   compiling macros, preview mode.
+
+   Basic configuration for LaTeX to PDF editing:
+   #+begin_src emacs-lisp
+     (setq TeX-parse-self t)
+     (setq-default TeX-master nil)
+     (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+     (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+     (setq reftex-plug-into-AUCTeX t)
+     (setq TeX-PDF-mode t)
+   #+end_src
+   
+   Fontify some of our commonly used macros:
+   #+begin_src emacs-lisp
+     (setq font-latex-match-bold-command-keywords
+           '(("pkg" "{") ("proglang" "{") ("software" "{")
+             ("CRANpkg" "{") ("BIOpkg" "{") ("strong" "{")))
+     (setq font-latex-match-type-command-keywords
+           '(("code" "{") ("samp" "{") ("file" "{")
+             ("Rpackage" "{") ("Robject" "{") ("Rcode" "{") ("email" "{")))
+     (setq font-latex-match-italic-command-keywords
+           '(("dfn" "{") ("samp" "{") ("Biocpkg" "{") ("Githubpkg" "{")
+             ("Rpackage" "{") ("Rclass" "{") ("bioccomment" "{")))
+     (setq font-latex-match-warning-command-keywords
+           '(("warning" "{") ("fixme" "{")))
+     (setq LaTeX-verbatim-environments
+           '("verbatim" "example" "SweaveOutput" "SweaveInput"))
+   #+end_src
+
+   Add natbib referece macros, since natbib is usually not mentioned
+   in the TeX file:
+   #+begin_src emacs-lisp
+   (setq font-latex-match-reference-keywords
+      '(("cite" "*[[{")
+        ("citet" "*[[{")
+        ("citealt" "*[[{")
+        ("citep" "*[[{")
+        ("citealp" "*[[{")
+        ("citeauthor" "*[[{")
+        ("citefullauthor" "[[{")
+        ("citeyear" "[[{")
+        ("citeyearpar" "[[{")
+        ("shortcites" "{")))
+   #+end_src
+   
+   We should look into autocompletion.
+
+** gradle-mode
+   We use gradle for building Minecraft mods.
+
+   #+begin_src emacs-lisp
+   (require 'gradle-mode)
+   (gradle-mode 1)
+   #+end_src
+   
+* Interface
+  :PROPERTIES:
+  :ID:       2ff9e6e7-1016-401d-a813-efeaffd47d44
+  :END:
+  Emacs (on the desktop) provides the usual editor GUI, including a
+  menubar, toolbar, scrollbar, etc. We don't need those.
+  #+begin_src emacs-lisp
+    (menu-bar-mode 0)
+    (tool-bar-mode 0)
+    (scroll-bar-mode -1)
+  #+end_src
+  
+  Emacs can display multiple documents at once by splitting the
+  "frame" into "windows". We define some keybindings for creating,
+  destroying and moving between windows.
+  #+begin_src emacs-lisp
+  (global-set-key (kbd "M-1") 'delete-other-windows)
+  (global-set-key (kbd "M-2") 'split-window-vertically)
+  (global-set-key (kbd "M-3") 'split-window-horizontally)
+  (windmove-default-keybindings 'meta)
+  #+end_src
+
+  Stop the damn bell ringing!
+  #+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+  #+end_src
+
+  No need for a startup buffer.
+  #+begin_src emacs-lisp
+  (setq inhibit-startup-message t)
+  #+end_src
+
+  Escape should... escape:
+  #+begin_src emacs-lisp
+  (global-set-key [(escape)] 'keyboard-escape-quit)
+  #+end_src
+  
+* Navigation
+  In order to edit text, we have to find it.
+  
+** Across files
+   The file system organizes files to make them easy to find, but it
+   can be tedious navigating complex directory hierarchies. We can be
+   smarter, and the helm package is. The =helm-for-files= command
+   searches in this order: currently loaded files, recently loaded
+   files, files in the current directory, and files in the global
+   locate index. When we do want to a file in a specific location in
+   the hierarchy, such as when creating a new file, we have
+   =helm-find-files=, which is an auto-completing file browser.
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "M-`") 'helm-for-files)
+   (global-set-key (kbd "C-o") 'helm-find-files)
+   #+end_src
+
+   Hide details when helming through buffers:
+   #+begin_src emacs-lisp
+   (setq helm-buffer-details-flag nil)
+   #+end_src
+   
+   Use recentf for searching recent files:
+   #+begin_src emacs-lisp
+     (setq helm-ff-file-name-history-use-recentf t)
+   #+end_src
+   
+   Enabling fuzzy matching in helm:
+   #+begin_src emacs-lisp
+     (setq helm-buffers-fuzzy-matching t
+           helm-recentf-fuzzy-match    t)
+   #+end_src
+
+   It would be nice if the search included files from the current
+   project, and we can do that with helm-projectile. We can also add
+   the list of projects at the end, so we always have the option to
+   jump to another project. Only failing those do we resort to the
+   locate database.
+   #+begin_src emacs-lisp
+     (setq helm-for-files-preferred-list
+           '(helm-source-buffers-list
+             helm-source-recentf
+             helm-source-bookmarks
+             helm-source-file-cache
+             helm-source-files-in-current-dir
+             helm-source-projectile-files-list
+             helm-source-projectile-projects
+             helm-source-locate))
+   #+end_src
+
+   Sometimes we know we want to navigate directly to a project:
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "C-p") 'helm-projectile-switch-project)
+   #+end_src
+   
+   Often we need to find something, but we do not know the containing
+   file. In those cases, we need to grep, and we can use
+   helm-projectile to automatically (and incrementally) grep through
+   the current project files. However, if we are not in a project,
+   this will fail, so we have to condition, and fallback to the
+   ordinary helm grep when outside a project.
+   #+begin_src emacs-lisp
+     (defun my-rgrep ()
+       (interactive)
+       (if (projectile-project-p)
+           (call-interactively 'helm-projectile-grep)
+         (call-interactively 'helm-do-grep)))
+     (global-set-key (kbd "C-g") 'my-rgrep)
+   #+end_src
+
+   By default, the =helm-do-grep= will not recurse, so we change that.
+   #+begin_src emacs-lisp
+     (eval-after-load 'helm-grep
+       '(setq helm-grep-default-command helm-grep-default-recurse-command))
+   #+end_src
+
+   It is not possible to perform editing tasks while the helm grep is
+   active. There are a couple of options:
+   * Finish the session and resume it with =helm-resume= (this seems
+     to be broken),
+   * Save the session to a helm-grep buffer.
+     
+   Currently, we take the saving approach. But there are some annoying
+   key-bindings in =helm-grep-mode=, which we fix:
+   #+begin_src emacs-lisp
+     (define-key helm-grep-mode-map [(meta up)] 'windmove-up)
+     (define-key helm-grep-mode-map [(meta down)] 'windmove-down)
+   #+end_src
+
+   This works well for files with no structure, but when there is a
+   language with a formal syntax, we can do better. At the very least,
+   we can search for symbol definitions and references. GNU Global is
+   a framework for editor-independent source code indexing. R support
+   is provided by the =rgtags= R package. The ggtags package
+   integrates GNU Global indexes with Helm. We enable it for C/C++ and
+   R buffers.
+   #+begin_src emacs-lisp
+     (add-hook 'c-mode-hook 'ggtags-mode)
+     (add-hook 'c++-mode-hook 'ggtags-mode)
+     (add-hook 'ess-mode-hook 'ggtags-mode)
+   #+end_src
+   =ggtags-find-tag-dwim= will jump to a definition (if the symbol at
+   point is a reference), or to a reference (if the symbol is a
+   definition). With a prefix arg, it uses helm to find
+   definitions. We make that a bit easier, and also add a binding to
+   find references to symbols defined elsewhere:
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "C-.") 'ggtags-find-definition)
+   (global-set-key (kbd "s-.") 'ggtags-find-other-symbol)
+   #+end_src
+   We can always find internal references by browsing to the
+   definition and then finding references at point.
+   
+** Within files
+   Emacs can obviously recognize the limits of words, lines,
+   paragraphs and documents, so there are commands for iterating the
+   cursor over those elements. We refine some of the bindings to make
+   them more convenient.
+   #+begin_src emacs-lisp
+   (global-set-key [(super left)] 'move-beginning-of-line)
+   (global-set-key [(super right)] 'move-end-of-line)
+   (global-set-key [(super up)] 'beginning-of-buffer)
+   (global-set-key [(super down)] 'end-of-buffer)
+   #+end_src
+
+   One area where Emacs feels somewhat archaic is its scrolling. When a
+   document is too long to show in the buffer window, we need to scroll
+   the window over the text. By default, Emacs does not scroll until
+   the cursor hits the bottom or top of the window, which means there
+   is no buffer "in front" of the cursor, and the scrolling is very
+   chunky. The "smooth scrolling" package fixes this:
+   #+begin_src emacs-lisp
+   (setq scroll-preserve-screen-position t)
+   (require 'smooth-scrolling)
+   #+end_src
+
+   We also tweak the mouse wheel scrolling:
+   #+begin_src emacs-lisp
+   (defun up-slightly () (interactive) (scroll-up 5))
+   (defun down-slightly () (interactive) (scroll-down 5))
+   (global-set-key [mouse-4] 'down-slightly)
+   (global-set-key [mouse-5] 'up-slightly)
+   #+end_src
+
+   Often, we want to seek to the occurrence of a symbol in the file,
+   and we can get there with incremental search.
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "C-f") 'isearch-forward-regexp)
+   #+end_src
+
+   Skip to a specific line:
+   #+begin_src R
+   (global-set-key (kbd "C-l") 'goto-line)
+   #+end_src
+   
+* Rendering
+  After finding the place, in the right file, we need to be able to
+  see and understand the text in order to edit it. This requires a
+  clean theme, as well as language-specific features like syntax
+  highlighting.
+
+  Enable the Solarized "light" theme ("dark" is equally good):
+  #+begin_src emacs-lisp
+  (load-theme 'solarized-light t)
+  #+end_src
+  
+  Enable syntax-highlighting:
+  #+begin_src emacs-lisp
+  (global-font-lock-mode t)
+  (setq font-lock-maximum-decoration t)
+  #+end_src
+
+  Make it easier to see the current line:
+  #+begin_src emacs-lisp
+  ;; highlight current line
+  (global-hl-line-mode)
+  #+end_src
+  
+  Configure the font:
+  #+begin_src emacs-lisp
+    (set-default-font "Bitstream Vera Sans Mono-10")
+  #+end_src
+  
+* Buffer management
+  This category includes actions like saving and closing buffers. This
+  might seem boring, but managing the number of open buffers can
+  become tedious. The =helm-for-files= command, bound above, lets us
+  mark multiple buffers for batch closing. But we often need to close
+  many files, usually all within a single project, on which we have
+  finished some work. The projectile package makes this easy. It knows
+  which files are in the same project as the current buffer and
+  provides a short-cut for closing all of them.
+
+  #+begin_src emacs-lisp
+  (global-set-key (kbd "C-w") 'kill-this-buffer)
+  (global-set-key (kbd "s-w") 'projectile-kill-buffers)
+  #+end_src
+  
+* File management
+** File operations
+   We have already reviewed opening files. In addition, we can save
+   files to disk, delete them and rename them.
+
+   Saving files is easy:
+   #+begin_src emacs-lisp
+     (global-set-key (kbd "C-s") 'save-buffer)
+   #+end_src
+
+   Removing them is trickier, especially if we want to inform the
+   version control system.
+   #+begin_src emacs-lisp
+     (defun delete-file-and-buffer ()
+       "Kill the current buffer and deletes the file it is visiting."
+       (interactive)
+       (let ((filename (buffer-file-name)))
+         (when filename
+           (if (vc-backend filename)
+               (vc-delete-file filename)
+             (progn
+               (delete-file filename)
+               (message "Deleted file %s" filename)
+               (kill-buffer))))))
+     (global-set-key (kbd "M-w") 'delete-file-and-buffer)
+   #+end_src
+
+   Similar gymnastics are needed for renaming:
+   #+begin_src emacs-lisp
+     (defun rename-file-and-buffer ()
+       "Rename the current buffer and file it is visiting."
+       (interactive)
+       (let ((filename (buffer-file-name)))
+         (if (not (and filename (file-exists-p filename)))
+             (message "Buffer is not visiting a file!")
+           (let ((new-name (read-file-name "New name: " filename)))
+             (cond
+              ((vc-backend filename) (vc-rename-file filename new-name))
+              (t
+               (rename-file filename new-name t)
+               (set-visited-file-name new-name t t)))))))
+     (global-set-key (kbd "M-r")  'rename-file-and-buffer)
+   #+end_src
+
+** File system browsing
+   The dired-mode is extremely useful for navigating and operating on
+   directories. Here are a few tweaks.
+
+   Avoid annoying confirmation for recursive deletes and copies.
+   #+begin_src emacs-lisp
+   (setq dired-recursive-copies 'always
+         dired-recursive-deletes 'always)
+   #+end_src
+
+   Hide the rarely useful dired details by default:
+   #+begin_src emacs-lisp
+     (add-hook 'dired-mode-hook
+               (lambda () (dired-hide-details-mode 1)))
+   #+end_src
+   
+** Comparison
+   A primary occuptation of software development, and authoring in
+   general, is change management. Emacs provides the =ediff= tool for
+   displaying differences between files.
+
+   By default, =ediff= creates multiple frames (windows),
+   which is annoying, so force it to create multiple windows (panes)
+   in one frame. We like to stretch the Emacs window along the Y axis,
+   so we configure =ediff= to split the window vertically.
+   #+begin_src emacs-lisp
+   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+   (setq ediff-split-window-function 'split-window-vertically)
+   #+end_src
+   
+** Version control
+   Avoid annoying "Summary" prefix on every log message:
+   #+begin_src emacs-lisp
+     (eval-after-load 'log-edit
+       '(remove-hook 'log-edit-hook 'log-edit-insert-message-template))
+   #+end_src
+
+   Bind search/clone for GitHub repositories:
+   #+begin_src emacs-lisp
+   (define-key global-map [(super g)] 'github-search-clone-repo)
+   #+end_src
+
+   Since the R repository does not use any ignore settings (not sure
+   why, but it is probably controversal), we bind "x" to hide all of
+   the unregistered generated files:
+   #+begin_src emacs-lisp
+   (add-hook 'vc-dir-mode-hook
+          (lambda ()
+            ;; hide files with the same state as the entry at point
+            (define-key vc-dir-mode-map
+              (kbd "x") (lambda () (interactive)
+                          (setq current-prefix-arg '(4)) ; C-u
+                          (call-interactively 'vc-dir-hide-state)))
+            ))
+   #+end_src
+   
+* Language modes
+* Automated editing
+  Ideally, all editing would be automated, and we would communicate
+  our /intent/ to the editor, rather than entering raw characters.
+
+  For example, we can have Emacs fill (wrap) text automatically:
+  #+begin_src emacs-lisp
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  #+end_src
+
+  And pressing the tab-key should insert actual spaces, not tab
+  characters:
+  #+begin_src R
+  (setq-default indent-tabs-mode nil)
+  #+end_src
+
+  Default tab width for C/C++/Java:
+  #+begin_src emacs-lisp
+  (setq-default c-basic-offset 4)
+  #+end_src
+  
+** Selection-based
+    Perhaps the simplest mechanism of automatic editing is performing
+    operations on regions of text, i.e., moving beyond the 0D cursor
+    position to 1D ranges. We say 1D, since we think of text as a
+    contiguous string of characters, even if those characters span
+    multiple lines when rendered. While Emacs *is* capable of
+    arbitrary rectangular selection, it is rarely useful.
+
+    For the sake of familiarity, we rely on the CUA (Common User
+    Access) model, as defined by IBM decades ago. Entering the Emacs
+    CUA mode activates selection whenever we hold the SHIFT key. It
+    also binds the primal editing actions of cut/copy/paste/undo to
+    the standard set forth by Apple in the early 1980's and copied by
+    Microsoft and others.
+    #+begin_src emacs-lisp
+    (cua-mode t)
+    #+end_src
+    Combined with the intelligent cursor movement commands, it is easy
+    to select characters, words, lines, paragraphs or entire buffers.
+
+    When pasting code, we want it to indent into its new context:
+    #+begin_src emacs-lisp
+      (defadvice yank (after indent-region activate)
+         (if (member major-mode '(emacs-lisp-mode
+                                  c-mode c++-mode ess-mode
+                                  latex-mode))
+             (indent-region (region-beginning) (region-end) nil)))
+    #+end_src
+
+    We can also toggle the comment state of a region:
+    #+begin_src emacs-lisp
+    (global-set-key (kbd "C-;") 'comment-or-uncomment-region)
+    #+end_src
+    
+** Syntactic
+   Performing manual editing actions with the clipboard is better than
+   changing a character at a time, but it can become tedious when a
+   very similar action needs to be repeated many times. We can tell
+   Emacs to perform a certain action based on automatic syntax
+   matching. The most famous of these is find/replace.
+
+   Many text editors offer an incremental find/replace, where the
+   program steps through every match, giving the user the option to
+   replace. Emacs has this, and ggtags extends it to operate over
+   projects, considering only actual code symbols, which enables a
+   crude sort of refactoring.
+   #+begin_src emacs-lisp
+     (global-set-key (kbd "C-r") 'query-replace-regexp)
+     (global-set-key (kbd "s-r") 'ggtags-query-replace)
+   #+end_src
+
+   Whitespace can be annoying to manage. This keybinding lets us
+   delete consecutive blank lines:
+   #+begin_src emacs-lisp
+   (global-set-key [(meta backspace)] 'delete-blank-lines)
+   #+end_src
+   
+** Semantic 
+
+* Developer utilities
+** Compilation
+   Projectile provides a shortcut to build the current project. To
+   prevent it from prompting us to confirm the compilation command, we
+   clear this variable:
+   #+begin_src emacs-lisp
+   (setq compilation-read-command nil)
+   #+end_src
+
+** Terminal
+   Emacs offers a terminal mode that functions just like any
+   other. The multi-term package makes it easy to have multiple
+   terminals at once.
+   #+begin_src emacs-lisp
+   (require 'multi-term)
+   #+end_src
+
+   The following code will open a new terminal if
+   the user requests the terminal window while already there.
+   #+begin_src emacs-lisp
+     (defun last-term-buffer (l)
+       "Return most recently used term buffer."
+       (when l
+         (if (eq 'term-mode (with-current-buffer (car l) major-mode))
+             (car l) (last-term-buffer (cdr l)))))
+
+     (defun get-term ()
+       "Switch to the term buffer last used, or create a new one if
+         none exists, or if the current buffer is already a term."
+       (interactive)
+       (let ((b (last-term-buffer (buffer-list))))
+         (if (or (not b) (eq 'term-mode major-mode))
+             (multi-term)
+           (switch-to-buffer b))))
+
+     (global-set-key (kbd "C-x t") 'get-term)
+   #+end_src
+
+   Often, we want to paste into a terminal, but the Emacs yank
+   mechanism acts at the /buffer/ level, rather than sending the text
+   to the shell process. Thus, we set our own yank binding that /does/
+   talk to the process. We could not use C-v here, because that
+   conflicts with cua-mode. We tried to disable that properly, but
+   never really succeeded.
+   #+begin_src emacs-lisp
+     (add-to-list 'term-bind-key-alist '("C-y" . term-paste))
+   #+end_src
+
+   R emits UTF8 characters, which can mess things up without this:
+   #+begin_src emacs-lisp
+     (defadvice multi-term (after advise-ansi-term-coding-system)
+       (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+     (ad-activate 'multi-term)
+   #+end_src
+
+** Shell
+   For tasks where an actual terminal emulator is not needed, it is
+   often more seamless to use the native Emacs shell. The shell is
+   based on =comint= mode, which also manages R session buffers. This
+   integration enables execution of R sessions on remote host, via the
+   shell. We bind it to a convenient key:
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "M-t") 'shell)
+   #+end_src
+
+   We customize some simple interactions:
+   #+begin_src emacs-lisp
+   (setq comint-scroll-to-bottom-on-input t)
+   (setq comint-move-point-for-output t)
+   #+end_src
+
+   And enable display of color via SGR sequences:
+   #+begin_src emacs-lisp
+     (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+     (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
+   #+end_src
+
+   Completing from history is a critical feature for any shell. We
+   bind "backtab" (shift-tab) to step back through the history based
+   on matches to the current input. We also bind a helm search.
+   #+begin_src emacs-lisp
+     (define-key comint-mode-map [(backtab)]
+       'comint-previous-matching-input-from-input)
+     (define-key comint-mode-map (kbd "M-i") 'helm-comint-input-ring)
+   #+end_src
+
+   We also define some navigation shortcuts:
+   #+begin_src emacs-lisp
+     (define-key comint-mode-map [(super up)] 'comint-previous-prompt)
+     (define-key comint-mode-map [(super down)] 'comint-next-prompt)
+     (define-key comint-mode-map [(home)] 'comint-bol)
+     (define-key comint-mode-map [(super left)] 'comint-bol)
+   #+end_src
+   
+* Structured documents
+** Org-mode
+   Org-mode provides support and tooling around a markdown-style
+   language for structuring plain text. It is a huge package,
+   encompassing TODO lists, spreadsheets, and polyglot literate
+   programming. In fact, we wrote this init file in org-mode.
+
+   Org-mode defines many keybindings, some of which conflict with our
+   configuration. We simply clear many of them, and move others.
+   #+begin_src emacs-lisp
+     (defun mfl/org-hook ()
+       (interactive)
+       (local-unset-key [(meta down)])
+       (local-unset-key [(meta up)])
+       (local-unset-key [(shift ctrl up)])
+       (local-unset-key [(shift ctrl down)])
+       (local-unset-key [(shift up)])
+       (local-unset-key [(shift down)])
+       (local-unset-key [(shift return)])
+       (local-unset-key [(shift left)])
+       (local-unset-key [(shift right)])
+       (local-unset-key [(control shift left)])
+       (local-unset-key [(control shift right)])
+       (local-set-key [(super return)] 'org-table-copy-down)
+       (local-set-key [(super up)] 'org-backward-heading-same-level)
+       (local-set-key [(super down)] 'org-forward-heading-same-level)
+       (local-set-key (kbd "RET") 'org-return-indent)
+       (local-set-key [(shift meta up)] 'org-metaup)
+       (local-set-key [(shift meta down)] 'org-metadown)
+     )
+     (add-hook 'org-mode-hook 'mfl/org-hook)
+   #+end_src        
+
+   Org-mode supports links between nodes, files, and everything else
+   (it is very extensible).
+   #+begin_src emacs-lisp
+   (define-key global-map [(super l)] 'org-store-link)
+   #+end_src
+   When we press ENTER on a link, follow it:
+   #+begin_src emacs-lisp
+   (setq org-return-follows-link t)
+   #+end_src
+
+   When specifying a link to a node in an org file, we want to use an
+   immutable, global ID, so that links work even when nodes are moved
+   between files. We want this to be automatic, with completion. The
+   completion does not work out of the box, but we implement it with
+   by defining the =org-id-complete-link= function. If we select "id:"
+   as the link type when entering a link, that function will be called
+   for completion.
+   #+begin_src emacs-lisp
+     (require 'org-id)
+     (setq org-id-link-to-org-use-id t)   
+     (org-id-update-id-locations)
+     (defun org-id-complete-link (&optional arg)
+       "Create an id: link using completion"
+       (concat "id:"
+               (org-id-get-with-outline-path-completion org-refile-targets)))
+   #+end_src
+
+   Integrate org-mode with reftex for easily adding bibtex references:
+   #+begin_src emacs-lisp
+     (defun org-mode-reftex-setup ()
+       (load-library "reftex")
+       (and (buffer-file-name)
+            (file-exists-p (buffer-file-name))
+            (reftex-parse-all))
+       (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
+       )
+     (add-hook 'org-mode-hook 'org-mode-reftex-setup)
+
+     (require 'ox-bibtex)
+   #+end_src
+   
+*** TODO Use org-dotemacs to implement this file
+    
+** Literate programming
+   The org-babel module lets us interweave code and prose.
+   #+begin_src emacs-lisp
+     (setq org-src-fontify-natively t)
+     (setq org-src-window-setup 'current-window)
+     (setq org-confirm-babel-evaluate nil)
+     (setq org-export-babel-evaluate nil)
+     (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((R . t)
+        (latex . t)
+        (ditaa . t)))
+   #+end_src
+
+   We try to prettify the code when rendered via LaTeX:
+   #+begin_src emacs-lisp
+     ;; for minted
+     (setq org-latex-pdf-process
+           (quote
+            ("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+             )))
+     (setq org-latex-minted-options
+           '(("frame" "leftline")))
+
+     (setq org-latex-listings 'minted)
+     (add-to-list 'org-latex-packages-alist '("" "inconsolata"))
+     (add-to-list 'org-latex-packages-alist '("" "minted"))
+   #+end_src
+   This requires having the minted package installed.
+   
+   Typing out code block headers can become tedious, so we define some
+   templates for languages we use often:
+   #+begin_src emacs-lisp
+     (defun mfl/babel-template-hook ()
+       (interactive)
+       (add-to-list 'org-structure-template-alist
+          '("r" "#+begin_src R\n?\n#+end_src" "<src lang=\"R\">\n\n</src>"))
+       (add-to-list 'org-structure-template-alist
+          '("l" "#+begin_src latex\n?\n#+end_src" "<src lang=\"latex\">\n\n</src>"))
+       (add-to-list 'org-structure-template-alist
+          '("e" "#+begin_src emacs-lisp\n?\n#+end_src" "<src lang=\"emacs-lisp\">\n\n</src>"))
+       )
+     (add-hook 'org-mode-hook 'mfl/babel-template-hook)
+   #+end_src
+   
+* R integration
+  We rely on ESS for integrating R with Emacs. 
+
+  Before loading ESS, we have to configure the code style. We use C++,
+  because it comes recommended by R core.
+  #+begin_src emacs-lisp
+    (setq ess-default-style 'C++) ; must happen before loading ESS
+  #+end_src
+
+  Load the package:
+  #+begin_src emacs-lisp
+  (require 'ess-site)
+  #+end_src
+  
+   We disable some of the annoying features of ESS:
+   #+begin_src emacs-lisp
+     (setq ess-ask-for-ess-directory nil)
+     (ess-toggle-underscore nil)
+     (defun no-process-query-hook ()
+       (set-process-query-on-exit-flag (get-buffer-process (current-buffer)) nil))
+     (add-hook 'ess-post-run-hook 'no-process-query-hook)
+   #+end_src
+
+   And enable a keybinding that lets us evaluate R code anywhere:
+   #+begin_src emacs-lisp
+     (defun my-ess-eval ()
+       (interactive)
+       (if (and transient-mark-mode mark-active)
+           (call-interactively 'ess-eval-region)
+         (ess-eval-line-and-step t nil nil)))
+     (global-set-key [(shift return)] 'my-ess-eval)
+   #+end_src
+
+   Filling Rd mode:
+   #+begin_src emacs-lisp
+     (defun my-Rd-mode-hook ()
+       (make-local-variable 'paragraph-start)
+       (make-local-variable 'paragraph-separate)
+       (setq paragraph-start
+             (concat
+              "\\s *$"
+              "\\|" "\\s *}\\s *$"
+              "\\|" "\\s *\\\\.*[{}]\\s *$")
+             paragraph-separate
+             (concat
+              "\\s *$"
+              "\\|" "\\s *}\\s *$"
+              "\\|" "\\s *\\\\.*{\\s *$")))
+
+     (add-hook 'Rd-mode-hook 'my-Rd-mode-hook)
+   #+end_src
+
+   We use Sweave/LaTeX for writing vignettes, so plug into AUCTeX:
+   #+begin_src emacs-lisp
+   (setq ess-swv-plug-into-AUCTeX-p t)
+   #+end_src
+ 
+* Getting things done
+  We use org-mode to implement the GTD strategy. The following
+  sections are the steps in the workflow.
+  
+** Capture
+   The goal is an efficient mechanism for dumping "stuff" into a bin
+   for later processing. The =org-capture= module implements this, and
+   we define a global keybinding that lets us capture arbitrary
+   information from anywhere:
+   #+begin_src emacs-lisp
+     (define-key global-map [(super c)] 'org-capture)
+   #+end_src
+
+   We want to streamline entry for the most common ways we encounter
+   stuff, including:
+   * As we think of something while reviewing a project,
+   * When we receive or think of something off-line (conversation),
+   * When we receive something by email or see something on the web.
+   Sometimes, the next action is obvious (we clarify immediately), so
+   we want a =TODO= item by default, while in general we are just
+   capturing information (potentially for later clarification
+   into an action).
+   
+   We define templates to facilitate these use cases:
+   #+begin_src emacs-lisp
+     (setq org-directory "~/org")
+     (setq org-capture-templates
+      '(("i" "Info" entry (file "inbox.org")
+         "* %?\n  %u\n")
+        ("t" "Todo" entry (file "inbox.org")
+         "* TODO %?\n  %u\n")
+	("r" "Link Todo" entry (file "inbox.org")
+         "* TODO %?\n  %a\n  %u\n")
+        ("w" "Web" entry (file "inbox.org")
+         "* TODO %i%?\n  %c\n  %u\n")))
+   #+end_src
+   
+   The "w" template expects to be driven from Firefox via the
+   org-capture FF extension and the org-protocol handler for
+   =emacsclient=. This requires starting the Emacs server.
+   #+begin_src emacs-lisp
+     (server-start)
+     (require 'org-protocol)
+   #+end_src
+   
+   Hook the (non-web) templates up to global keybindings:
+   #+begin_src emacs-lisp
+     (define-key global-map [(super i)]
+       (lambda () (interactive) (org-capture nil "i")))
+     (define-key global-map [(super t)]
+       (lambda () (interactive) (org-capture nil "t")))
+     (define-key global-map [(super r)]
+       (lambda () (interactive) (org-capture nil "r")))
+   #+end_src
+
+   If we already know that an item relates to a project, we can use
+   the org-projectile package to automatically file it under a
+   projectile project (all of our projects should be in version
+   control) within "projects.org". We use a single file to avoid mess
+   in the filesystem.
+   #+begin_src emacs-lisp
+     (setq org-projectile:projects-file "~/org/projects.org")
+   #+end_src
+
+   We add a capture template that automatically captures under the
+   current project:
+   #+begin_src emacs-lisp
+   (add-to-list 'org-capture-templates (org-projectile:project-todo-entry))
+   #+end_src
+   The project headline is a link to the projectile project. That
+   requires running elisp inside of the link, which prompts us for
+   security reasons. Disable that.
+   #+begin_src emacs-lisp
+   (setq org-confirm-elisp-link-function nil)
+   #+end_src
+   
+   And this keybinding will autocomplete project names for when we are
+   outside of a project:
+   #+begin_src emacs-lisp
+     (define-key global-map [(super p)]
+	'org-projectile:project-todo-completing-read)
+    #+end_src
+   
+    For collaborative projects, we need to integrate with external
+    issue trackers. Issues and actions are not necessarily the same
+    thing. Actions would need to fall under a headline for the issue,
+    or simply link to the issue. But the content of the issue node is
+    probably fixed, or synced with the tracker, so a link is probably
+    the best way.
+    
+** Clarify
+   When clarifying the stuff, we figure out what the stuff is about
+   and decide how to handle it. If it actionable, come up with a next
+   action. If the action is about a project, file it appropriately. If
+   it can be done in a few minutes, do it. Otherwise,
+   defer. Clarification often happens immediately, in conjunction with
+   the capture phase.
+
+   To clarify the entries, we need to view them first. All of the
+   capture templates put the unorganized entries into the same place:
+   the "inbox.org" file, and it is probably easy enough to browse to
+   look at that file.
+   
+*** What is it?
+    To answer this question, we need to access online resources and
+    send queries to colleagues. It therefore helps that we maintain
+    links from captured stuff to e.g. emails in GMail. Once we receive
+    clarification, we can use org-mode's note taking facilities to add
+    details under the header (see [[Structured Documents]]).
+
+*** Is it actionable?
+    Actionable items are marked as with the =TODO= state with
+    =org-todo=. We define a number of different org TODO states, most
+    of which will be explained later.
+    #+begin_src emacs-lisp
+     (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w/!)" "SOMEDAY(s)"
+                                         "|" 
+                                         "DONE(d!)" "CANCELED(c@)")))
+    #+end_src
+
+*** Is it about a project (multi-step process)?
+    If yes, file it under a project heading via =org-refile=. The
+    projects live in "projects.org". Otherwise, file it into the
+    simple tasks list, "todo.org".
+
+    We use helm to navigate to the correct heading, so we want to see
+    the whole path and there is no need to complete in steps.
+    #+begin_src emacs-lisp
+    (setq org-refile-use-outline-path 'file)
+    (setq org-outline-path-complete-in-steps nil)
+    (setq org-completion-use-ido nil)
+    (setq org-refile-allow-creating-parent-nodes t)
+    #+end_src
+
+    We allow completion to any level, i.e., into subprojects and
+    subsubprojects.
+    #+begin_src emacs-lisp
+      (setq org-refile-targets '(
+                         (nil :maxlevel . 10)
+                         (org-agenda-files :maxlevel . 10)
+                         ))
+    #+end_src
+    
+*** Can we do it now?
+    If it can be done "now" (within a few minutes), do it, and mark
+    the item with the =DONE= state (toggled with =org-todo=).
+
+*** If not, can it be delegated?
+    If we can delegate the task, then change it to the =WAITING= state
+    and tag it with the person responsible.
+
+    #+begin_src emacs-lisp
+      (setq org-tag-alist '(("Gabe" . ?G) ("Pete" . ?P) ("Matt" . ?M) ("1-on-1" . ?1)))
+    #+end_src
+    
+** Organize
+   In this stage, we:
+   * plan projects (see [[Project planning]]),
+   * file reference information,
+   * and handle tasks that were deferred during clarification.
+     
+   Just a note: org-review package may be useful for ticklers.
+   
+*** Reference material    
+   We file reference information with =org-refile=. For searching
+   reference material (as well as tasks and anything else), we use the
+   helm-org-rifle package. It uses helm to find headlines with titles
+   or content matching a query.
+
+   #+begin_src emacs-lisp
+     (define-key global-map [(super o)] 'helm-org-rifle-org-directory)   
+   #+end_src
+
+*** Deferred tasks
+   When handling tasks, we:
+   * discard unnecessary ones,
+   * indefinitely defer those that are not currently actionable,
+   * and schedule day-specific tasks and ticklers.
+
+   To discard incoming tasks, we simply delete them. To indefinitely
+   defer, we mark the entry with the =SOMEDAY= state. Schedule tasks
+   with =org-schedule=. We can also set deadlines with =org-deadline=.
+   
+** Reflect
+   Once we have organized our stuff, we should reflect on it in order
+   to set priorities and agenda.  Org-mode provides summary agenda
+   views for reviewing tasks and projects. We setup the agenda view to
+   index any .org file in our directory:
+   #+begin_src emacs-lisp
+   (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
+   (define-key global-map [(super a)] 'org-agenda)
+   #+end_src
+   
+   On a daily basis, we want to reflect on the time-bound tasks and
+   next actions, separately. Time-bound tasks are best shown in a
+   calendar view, for which we use the calfw package, with the
+   org-agenda keybindings.
+   #+begin_src emacs-lisp
+     (require 'calfw-org)
+     (setq cfw:org-overwrite-default-keybinding t)
+     (define-key global-map [(super s)] 'cfw:open-org-calendar)
+     (setq cfw:org-agenda-schedule-args '(:timestamp))
+   #+end_src
+
+   To get the entire schedule for the day, we need to import events
+   from the Google Calendar, via the org-gcal package by executing
+   =org-gcal-fetch=. We can run this in a timer to update our calendar
+   every hour.
+   #+begin_src emacs-lisp
+   (run-with-timer 0 (* 60 60) 'org-gcal-fetch)
+   #+end_src
+
+   We want to keep things in context, so show days one week ahead
+   of time:
+   #+begin_src emacs-lisp
+   (setq org-agenda-ndays 7)
+   (setq org-agenda-start-on-weekday nil)
+   #+end_src
+
+   To see the next actions, i.e., those actions that are not scheduled
+   for a specific time in the future, we need a custom search. We also
+   need to perform a weekly review, which includes =SOMEDAY= items in
+   addition to next actions.
+   #+begin_src emacs-lisp
+     (setq org-agenda-custom-commands
+           '(("u" "Next Actions"
+              ((todo "TODO"
+                     ((org-agenda-overriding-header "\Next Actions")
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled)))))
+              nil
+              nil)
+             ("w" "Weekly Review"
+              ((todo ""
+                     ((org-agenda-overriding-header "\Weekly Review")
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled)))))
+              nil
+              nil)))
+   #+end_src
+
+** Engage
+   Once we have reviewed the action landscape, we have to decide, on a
+   moment-to-moment basis, which tasks to perform. There are some
+   strategies:
+
+*** Four criteria for deciding actions in the moment
+    * Context (location)
+    * Time available
+    * Energy available
+    * Priorites
+
+    The first three are external constraints (physical location and
+    resources), while prioritization requires more thought. For us,
+    context is simple, as we are either at home or work but always
+    with a computer.
+
+    Org-mode lets us set priorities during the reflection process, and
+    the next strategy can help.
+
+*** Six-level model for reviewing work
+    Evaluate how the work pertains to the following horizons, in
+    order of increasing abstraction:
+    * Current actions
+    * Current projects (annual goals)
+    * Focus and accountabilities (job)
+    * Long-term goals (e.g., get promoted in a couple years)
+    * Vision (where do you want to be in 5 years?)
+    * Purpose (why am I here?)
+    
+** Project planning
+   When initiating (and reviewing) a project, we follow the "Natural
+   Planning" process, as laid out below. All project materials should
+   be stored/referenced in version control, and so will be managed by
+   projectile. The org-projectile package makes the headline in the
+   tasks file a link that opens the project in projectile. The project
+   plan should be in its own file somewhere in the project.
+   
+*** Define purpose and principles
+    Our purpose motivates our vision for the project, and so is
+    useful for defining, and potentially redefining, our goals. The
+    principles constrain/guide the implementation. Every project plan
+    should lay these out up-front.
+    
+*** Define vision and desired outcome (goals)
+    Having a well-defined vision of success gives necessary
+    focus. Every project plan should have expicitly stated goals.
+
+*** Brainstorm paths to desired outcome
+    Make lists sans immediate judgement, quantity over
+    quality. Org-mode is great at making lists.
+
+*** Organize
+    Distill brainstorming into a specific set of requirements,
+    prioritize, define sequences, group components into a
+    hierarchy. Add details. Org-mode is good at this.
+   
+*** Next actions
+    For each component, identify a specific task to perform next.

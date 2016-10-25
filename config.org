@@ -695,7 +695,8 @@
    #+end_src
    
 ** Semantic 
-
+   These tools are language-specific. See e.g. [[R Integration]].
+   
 * Developer utilities
 ** Compilation
    Projectile provides a shortcut to build the current project. To
@@ -983,7 +984,19 @@
    #+begin_src emacs-lisp
    (setq ess-swv-plug-into-AUCTeX-p t)
    #+end_src
- 
+
+   Use ESS, dabbrev-code and gtags for completion with company mode:
+   #+begin_src emacs-lisp
+     (add-hook 'R-mode-hook (lambda ()
+                              (setq ess-company-backends
+                                    '((company-R-args
+                                       company-dabbrev-code
+                                       company-gtags
+                                       company-R-objects)))
+                              (company-mode)
+                              ))
+   #+end_src
+   
 * Getting things done
   We use org-mode to implement the GTD strategy. The following
   sections are the steps in the workflow.

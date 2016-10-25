@@ -804,6 +804,14 @@
      (define-key comint-mode-map [(home)] 'comint-bol)
      (define-key comint-mode-map [(super left)] 'comint-bol)
    #+end_src
+
+   Environment variables are not carried over correctly on the Mac,
+   so we fix that:
+   #+begin_src emacs-lisp
+     (when (memq window-system '(mac ns))
+       (exec-path-from-shell-initialize)
+       (exec-path-from-shell-copy-env "R_LIBS_USER"))
+   #+end_src
    
 * Structured documents
 ** Org-mode

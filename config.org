@@ -775,13 +775,27 @@
 
    Completing from history is a critical feature for any shell. We
    bind "backtab" (shift-tab) to step back through the history based
-   on matches to the current input. We also bind a helm search.
+   on matches to the current input.
    #+begin_src emacs-lisp
      (define-key comint-mode-map [(backtab)]
        'comint-previous-matching-input-from-input)
-     (define-key comint-mode-map (kbd "M-i") 'helm-comint-input-ring)
    #+end_src
 
+   We also bind a helm search. This would just be
+   =helm-comint-input-ring=, but that is broken for ESS buffers. It
+   was supposed to be fixed in ESS years ago, but that apparently
+   never happened, and we are left with this hack:
+   #+begin_src emacs-lisp
+     (defun ess-comint-input-ring ()
+       "Predefined `helm' that provide completion of `comint' history."
+       (interactive)
+       (helm :sources 'helm-source-comint-input-ring
+             :input (buffer-substring-no-properties (comint-line-beginning-position)
+                                                    (point-at-eol))
+             :buffer "*helm comint history*"))
+     (define-key inferior-ess-mode-map (kbd "C-c C-l") 'ess-comint-input-ring)
+   #+end_src
+    
    We also define some navigation shortcuts:
    #+begin_src emacs-lisp
      (define-key comint-mode-map [(super up)] 'comint-previous-prompt)

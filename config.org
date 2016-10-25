@@ -567,6 +567,14 @@
      (add-hook 'dired-mode-hook
                (lambda () (dired-hide-details-mode 1)))
    #+end_src
+
+   The OS X =ls= does not support enough features for dired; so we use
+   =ls-lisp=:
+   #+begin_src emacs-lisp
+     (when (eq system-type 'darwin)
+       (require 'ls-lisp)
+       (setq ls-lisp-use-insert-directory-program nil))
+   #+end_src
    
 ** Comparison
    A primary occuptation of software development, and authoring in

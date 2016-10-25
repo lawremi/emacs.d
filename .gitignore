@@ -13,3 +13,6 @@ network-security.data
 /recentf
 session.*
 src
+/.emacs.desktop
+/SessionDesktop.el
+/tramp

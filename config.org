@@ -241,14 +241,6 @@
    
    We should look into autocompletion.
 
-** gradle-mode
-   We use gradle for building Minecraft mods.
-
-   #+begin_src emacs-lisp
-   (require 'gradle-mode)
-   (gradle-mode 1)
-   #+end_src
-
 ** company mode
    Frontend to intelligent completion ("complete any"), with support
    for many backends.

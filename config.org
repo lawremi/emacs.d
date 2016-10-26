@@ -1225,7 +1225,7 @@
    addition to next actions.
    #+begin_src emacs-lisp
      (setq org-agenda-custom-commands
-           '(("u" "Next Actions"
+           '(("n" "Next Actions"
               ((todo "TODO"
                      ((org-agenda-overriding-header "\Next Actions")
                       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled)))))

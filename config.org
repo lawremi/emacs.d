@@ -480,7 +480,7 @@
   Configure the font:
   #+begin_src emacs-lisp
     (if (memq window-system '(mac ns))
-        (set-default-font "Inconsolata-14")
+        (set-default-font "Menlo-14")
       (set-default-font "Bitstream Vera Sans Mono-10"))
   #+end_src
 

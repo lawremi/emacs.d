@@ -884,7 +884,8 @@
       'org-babel-load-languages
       '((R . t)
         (latex . t)
-        (ditaa . t)))
+        (ditaa . t)
+        (emacs-lisp . t)))
    #+end_src
 
    We try to prettify the code when rendered via LaTeX:

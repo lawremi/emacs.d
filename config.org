@@ -999,6 +999,13 @@
      (define-key inferior-ess-mode-map (kbd "C-c C-l") 'ess-comint-input-ring)
    #+end_src
 
+   Had to disable eldoc, because it was causing a weird error: "error
+   in process sentinel: Customise alist is not specified, nor
+   ess-local-customize-alist is set". 
+   #+begin_src emacs-lisp
+     (setq ess-use-eldoc nil)
+   #+end_src
+
 * Getting things done
   We use org-mode to implement the GTD strategy. The following
   sections are the steps in the workflow.

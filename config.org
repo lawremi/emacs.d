@@ -461,7 +461,9 @@
 
   Enable the Solarized "dark" theme ("light" is equally good):
   #+begin_src emacs-lisp
-  (load-theme 'solarized-dark t)
+    (if (memq window-system '(mac ns))
+        (load-theme 'solarized-dark t)
+      (load-theme 'solarized-light t))
   #+end_src
   
   Enable syntax-highlighting:

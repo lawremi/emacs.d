@@ -615,7 +615,7 @@
 
    Bind search/clone for GitHub repositories:
    #+begin_src emacs-lisp
-   (define-key global-map [(super g)] 'github-search-clone-repo)
+   (define-key global-map [(super u)] 'github-search-clone-repo)
    #+end_src
 
    Since the R repository does not use any ignore settings (not sure

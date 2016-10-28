@@ -126,6 +126,10 @@
    run from within the R process. We might need an update macro that
    uses ESS to update tags.
 
+   #+begin_src emacs-lisp
+   (setq ggtags-highlight-tag nil)
+   #+end_src
+   
 ** ESS
    ESS embeds R into Emacs.
    

@@ -835,6 +835,8 @@
        (local-unset-key [(shift return)])
        (local-unset-key [(shift left)])
        (local-unset-key [(shift right)])
+       (local-unset-key [(control left)])
+       (local-unset-key [(control right)])
        (local-unset-key [(control shift left)])
        (local-unset-key [(control shift right)])
        (local-set-key [(super return)] 'org-table-copy-down)

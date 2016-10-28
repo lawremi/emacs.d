@@ -403,11 +403,20 @@
    a framework for editor-independent source code indexing. R support
    is provided by the =rgtags= R package. The ggtags package
    integrates GNU Global indexes with Helm. We enable it for C/C++ and
-   R buffers.
+   R buffers. We have the disable the eldoc support for ESS buffers,
+   since it somehow conflicts with ESS and causes temporary
+   lockups. Also, there is no point to updating the tags on save,
+   since GNU global has no built-in support for R.
    #+begin_src emacs-lisp
      (add-hook 'c-mode-hook 'ggtags-mode)
      (add-hook 'c++-mode-hook 'ggtags-mode)
-     (add-hook 'ess-mode-hook 'ggtags-mode)
+     (add-hook 'ess-mode-hook (lambda()
+                                (ggtags-mode)
+                                (remove-function
+                                 (local 'eldoc-documentation-function)
+                                 'ggtags-eldoc-function)
+                                (setq ggtags-update-on-save nil)
+                                ))
    #+end_src
    =ggtags-find-tag-dwim= will jump to a definition (if the symbol at
    point is a reference), or to a reference (if the symbol is a

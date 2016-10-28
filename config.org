@@ -1053,15 +1053,20 @@
          "* %?\n  %u\n")
         ("t" "Todo" entry (file "inbox.org")
          "* TODO %?\n  %u\n")
-	("r" "Link Todo" entry (file "inbox.org")
+        ("b" "Link-back Todo" entry (file "inbox.org")
          "* TODO %?\n  %a\n  %u\n")
         ("w" "Web" entry (file "inbox.org")
-         "* TODO %i%?\n  %c\n  %u\n")))
+         "* TODO %?\n  %c\n  %u\n  #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n")
+        ("p" "Chrome" entry (file "inbox.org")
+         "* TODO %?\n  %c\n  %u\n  #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n")
+        ("L" "Chrome Link" entry (file "inbox.org")
+         "* TODO %?\n  %c\n  %u\n\n")))
    #+end_src
    
-   The "w" template expects to be driven from Firefox via the
-   org-capture FF extension and the org-protocol handler for
-   =emacsclient=. This requires starting the Emacs server.
+   The "w", "p", and "L" templates expect to be driven from Firefox or
+   Chrome via their respective org-capture extensions and the
+   org-protocol handler for =emacsclient=. This requires starting the
+   Emacs server.
    #+begin_src emacs-lisp
      (server-start)
      (require 'org-protocol)
@@ -1073,8 +1078,8 @@
        (lambda () (interactive) (org-capture nil "i")))
      (define-key global-map [(super t)]
        (lambda () (interactive) (org-capture nil "t")))
-     (define-key global-map [(super r)]
-       (lambda () (interactive) (org-capture nil "r")))
+     (define-key global-map [(super b)]
+       (lambda () (interactive) (org-capture nil "b")))
    #+end_src
 
    If we already know that an item relates to a project, we can use

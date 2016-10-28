@@ -999,6 +999,12 @@
                               ))
    #+end_src
 
+   We turn on case sensitivity with dabbrev, since we are using R:
+   #+begin_src emacs-lisp
+     (setq company-dabbrev-ignore-case nil)
+     (setq company-dabbrev-downcase nil)
+   #+end_src
+   
    We also bind a helm search through ESS history. This would just be
    =helm-comint-input-ring=, but that is broken for ESS buffers. It
    was supposed to be fixed in ESS years ago, but that apparently

@@ -1190,7 +1190,7 @@
    or content matching a query.
 
    #+begin_src emacs-lisp
-     (define-key global-map [(super o)] 'helm-org-rifle-org-directory)   
+     (define-key global-map [(super o)] 'helm-org-rifle-agenda-files)
    #+end_src
 
 *** Deferred tasks

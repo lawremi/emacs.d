@@ -561,6 +561,11 @@
      (global-set-key (kbd "M-r")  'rename-file-and-buffer)
    #+end_src
 
+   There is no need to save "shadow" backup files. Just annoying.
+   #+begin_src emacs-lisp
+   (setq make-backup-files nil)
+   #+end_src
+   
 ** File system browsing
    The dired-mode is extremely useful for navigating and operating on
    directories. Here are a few tweaks.

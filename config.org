@@ -727,6 +727,8 @@
    #+begin_src emacs-lisp
    (global-set-key [(meta backspace)] 'delete-blank-lines)
    #+end_src
+
+   Should think about using =electric-pair-mode=.
    
 ** Semantic 
    These tools are language-specific. See e.g. [[R Integration]].

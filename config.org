@@ -83,7 +83,13 @@
      (define-key helm-grep-mode-map (kbd "<s-up>") 'helm-gm-precedent-file)
      (define-key helm-grep-mode-map (kbd "<M-up>") nil)
    #+end_src
-   
+
+   Use a consistent keybinding between =wdired= and =wgrep= (editable
+   buffers). This turns on wgrep inside of helm-grep mode:
+   #+begin_src emacs-lisp
+     (define-key helm-grep-mode-map (kbd "C-e") 'wgrep-change-to-wgrep-mode)
+   #+end_src
+
 ** Projectile
    Detects projects when a buffer inside a version-controlled
    directory is visited. Provides facilities for operating over all
@@ -577,6 +583,13 @@
      (when (eq system-type 'darwin)
        (require 'ls-lisp)
        (setq ls-lisp-use-insert-directory-program nil))
+   #+end_src
+
+   Use a consistent keybinding between =wdired= and =wgrep= (editable
+   buffers). This toggles read-only mode in dired:
+   #+begin_src emacs-lisp
+     (add-hook 'dired-mode-hook
+               (local-set-key (kbd "C-e") 'read-only-mode))
    #+end_src
    
 ** Comparison

@@ -472,6 +472,13 @@
    (global-set-key (kbd "C-l") 'goto-line)
    #+end_src
    
+** Web
+   We bind a key to use the built-in Emacs web browser (EWW) to search
+   for a selected word:
+   #+begin_src emacs-lisp
+   (global-set-key (kbd "s-g") 'eww-search-words)
+   #+end_src
+   
 * Rendering
   After finding the place, in the right file, we need to be able to
   see and understand the text in order to edit it. This requires a

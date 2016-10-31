@@ -16,3 +16,4 @@ src
 /.emacs.desktop
 /SessionDesktop.el
 /tramp
+/url

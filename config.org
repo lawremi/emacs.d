@@ -208,15 +208,18 @@
    Facilities for authoring LaTeX files. Fancy fontification,
    compiling macros, preview mode.
 
-   Basic configuration for LaTeX to PDF editing:
+   We configure AUCTeX to parse the file, and to cache the parsing in
+   the "auto" subdirectory, since it can be slow.
    #+begin_src emacs-lisp
      (setq TeX-parse-self t)
-     (setq-default TeX-master nil)
+     (setq TeX-auto-save t)
      (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-     (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+   #+end_src
+
+   Integrate reftex for managing references:
+   #+begin_src emacs-lisp
      (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
      (setq reftex-plug-into-AUCTeX t)
-     (setq TeX-PDF-mode t)
    #+end_src
    
    Fontify some of our commonly used macros:
@@ -273,6 +276,10 @@
 ** exec-path-from-shell
    Just needed on the Mac in order to properly get environment
    variables in the Emacs shell.
+   
+** polymode
+   Framework for literate programming. Enables embedding of code into
+   prose.
    
 * Interface
   :PROPERTIES:
@@ -1018,7 +1025,21 @@
    #+begin_src emacs-lisp
    (setq ess-swv-plug-into-AUCTeX-p t)
    #+end_src
+   and polymode:
+   #+begin_src emacs-lisp
+   (require 'poly-R)
+   (require 'poly-markdown)
+   (require 'poly-noweb)
+   #+end_src
 
+   Associate polymode to file extensions:
+   #+begin_src emacs-lisp
+     (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+     (add-to-list 'auto-mode-alist '("\\.Snw" . poly-noweb+r-mode))
+     (add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
+     (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
+   #+end_src
+   
    Use ESS, dabbrev-code and gtags for completion with company mode:
    #+begin_src emacs-lisp
      (add-hook 'R-mode-hook (lambda ()

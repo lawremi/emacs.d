@@ -614,7 +614,14 @@
      (add-hook 'dired-mode-hook
                (local-set-key (kbd "C-e") 'read-only-mode))
    #+end_src
-   
+
+   Dired will map C-o to =dired-display-file=, but we want to keep
+   that mapped to =helm-find-files=.
+   #+begin_src emacs-lisp
+     (add-hook 'dired-mode-hook
+               (lambda () (local-unset-key [(control o)])))
+   #+end_src
+
 ** Comparison
    A primary occuptation of software development, and authoring in
    general, is change management. Emacs provides the =ediff= tool for

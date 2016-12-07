@@ -142,9 +142,12 @@
    #+end_src
 
    We also installed the magithub package for GitHub integration
-   (create forks, submit pull requests, manage issues).
+   (create forks, submit pull requests, manage issues). This is
+   currently disabled, because constant querying for issues really
+   slows down the magit view. We really only wanted it for
+   forking. Its dependency on the =hub= command line tool is annoying.
    #+begin_src emacs-lisp
-   (require 'magithub)
+   ;(require 'magithub)
    #+end_src
 
    We also load github-search to find and clone repositories. Can then

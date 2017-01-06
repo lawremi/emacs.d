@@ -476,7 +476,7 @@
    #+end_src
 
    Skip to a specific line:
-   #+begin_src R
+   #+begin_src emacs-lisp
    (global-set-key (kbd "C-l") 'goto-line)
    #+end_src
    

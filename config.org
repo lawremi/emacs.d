@@ -117,6 +117,7 @@
 
    #+begin_src emacs-lisp
    (require 'org-projectile)
+   (require 'org-projectile-helm)
    #+end_src
    
 ** ggtags
@@ -815,9 +816,16 @@
    often more seamless to use the native Emacs shell. The shell is
    based on =comint= mode, which also manages R session buffers. This
    integration enables execution of R sessions on remote host, via the
-   shell. We bind it to a convenient key:
+   shell. We often create multiple shells, and name them to keep them
+   organized. We define a convenience for creating named shells and
+   bind it to a convenient key:
    #+begin_src emacs-lisp
-   (global-set-key (kbd "M-t") 'shell)
+     (defun create-shell ()
+       "creates a shell with a given name"
+       (interactive);; "Prompt\n shell name:")
+       (let ((shell-name (read-string "shell name: " nil nil "shell")))
+         (shell (concat "*" shell-name "*"))))
+     (global-set-key (kbd "M-t") 'create-shell)
    #+end_src
 
    We customize some simple interactions:
@@ -971,6 +979,12 @@
        )
      (add-hook 'org-mode-hook 'mfl/babel-template-hook)
    #+end_src
+
+   Add QML and Scala support:
+   #+begin_src emacs-lisp
+     (add-to-list 'org-src-lang-modes '("qml" . qml))
+     (add-to-list 'org-src-lang-modes '("scala" . scala))
+   #+end_src
    
 * R integration
   We rely on ESS for integrating R with Emacs. 
@@ -1076,6 +1090,34 @@
      (define-key inferior-ess-mode-map (kbd "C-c C-l") 'ess-comint-input-ring)
    #+end_src
 
+   We often run R within a screen session on the rescomp cluster. This
+   is a convenience for starting/resuming screen on a specified
+   host. It also takes care of the double echoing problem.
+   #+begin_src emacs-lisp
+     (defvar R-remote-host "rescomp.gene.com")
+     (defvar R-remote-screen "R")
+     (defun R-remote (&optional remote-host screen-name)
+       "Connect to the remote-host's screen-name screen running R."
+       (interactive (list
+                     (read-from-minibuffer "R remote host: " R-remote-host)
+                     (read-from-minibuffer "R remote screen name: " R-remote-screen)))
+       (pop-to-buffer (make-term (concat "R:" remote-host)
+                                 "ssh" nil "-t" remote-host
+                                 "screen" "-c" "/dev/null"
+                                 "-D" "-r" screen-name))
+       ;; avoid echo of your commands
+       (process-send-string nil "system('stty -echo')\n")
+       (ess-remote (process-name (get-buffer-process (current-buffer))) "R"))
+   #+end_src
+
+   Tweak indentation of function bodies:
+   #+begin_src emacs-lisp
+     (defun indent-ess-hook ()
+       (ess-set-style 'RStudio)
+       (setq ess-indent-offset 4))
+     (add-hook 'ess-mode-hook 'indent-ess-hook)
+   #+end_src
+   
 * Getting things done
   We use org-mode to implement the GTD strategy. The following
   sections are the steps in the workflow.
@@ -1137,13 +1179,15 @@
    control) within "projects.org". We use a single file to avoid mess
    in the filesystem.
    #+begin_src emacs-lisp
-     (setq org-projectile:projects-file "~/org/projects.org")
+     (setq org-projectile-projects-file "~/org/projects.org")
    #+end_src
 
    We add a capture template that automatically captures under the
    current project:
    #+begin_src emacs-lisp
-   (add-to-list 'org-capture-templates (org-projectile:project-todo-entry))
+   (push (org-projectile-project-todo-entry) org-capture-templates)
+   (define-key global-map (kbd "s-;")
+     (lambda () (interactive) (org-capture nil "p")))
    #+end_src
    The project headline is a link to the projectile project. That
    requires running elisp inside of the link, which prompts us for
@@ -1156,7 +1200,7 @@
    outside of a project:
    #+begin_src emacs-lisp
      (define-key global-map [(super p)]
-	'org-projectile:project-todo-completing-read)
+	'org-projectile-project-todo-completing-read)
     #+end_src
    
     For collaborative projects, we need to integrate with external
@@ -1176,8 +1220,8 @@
 
    To clarify the entries, we need to view them first. All of the
    capture templates put the unorganized entries into the same place:
-   the "inbox.org" file, and it is probably easy enough to browse to
-   look at that file.
+   the "inbox.org" file, and it is probably easy enough to browse that
+   file.
    
 *** What is it?
     To answer this question, we need to access online resources and

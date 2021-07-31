@@ -835,7 +835,7 @@
    R emits UTF8 characters, which can mess things up without this:
    #+begin_src emacs-lisp
      (defadvice multi-term (after advise-ansi-term-coding-system)
-       (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+       (set-process-coding-system 'utf-8-unix 'utf-8-unix))
      (ad-activate 'multi-term)
    #+end_src
 

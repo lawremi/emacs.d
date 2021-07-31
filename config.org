@@ -702,6 +702,28 @@
    #+end_src
    
 * Language modes
+** PoE Loot Filters
+   This depends on installing the package at
+   https://gitlab.com/queertypes/poe-filter-mode.
+   #+begin_src emacs-lisp
+   (add-to-list 'auto-mode-alist '("\\.filter\\'" . poe-filter-mode))
+   #+end_src
+** JSON
+   For Starbound mods:
+   #+begin_src emacs-lisp
+     (defun add-to-mode (mode lst)
+       (dolist (file lst)
+         (add-to-list 'auto-mode-alist
+                      (cons file mode))))
+
+     (add-to-mode 'json-mode (list
+                              "\\.statuseffect$"
+                              "\\.config$"
+                              "\\.config\\.patch$"
+			      "\\.object$"
+			      "\\.config\\.patch$"))
+   #+end_src
+   
 * Automated editing
   Ideally, all editing would be automated, and we would communicate
   our /intent/ to the editor, rather than entering raw characters.

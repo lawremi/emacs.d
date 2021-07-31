@@ -1045,6 +1045,13 @@
     (setq ess-default-style 'C++) ; must happen before loading ESS
   #+end_src
 
+  Add "R-release" as an R version so that we can explicitly start R
+  release while developing Bioconductor packages against R-devel
+  (which is symlinked from R half of the year).
+  #+begin_src emacs-lisp
+  (setq ess-r-versions ("R-devel" "R-patched" "R-release"))
+  #+end_src
+  
   Load the package:
   #+begin_src emacs-lisp
   (require 'ess-site)
@@ -1180,7 +1187,7 @@
    stuff, including:
    * As we think of something while reviewing a project,
    * When we receive or think of something off-line (conversation),
-   * When we receive something by email or see something on the web.
+   * When we receive something by email, Slack or see something on the web.
    Sometimes, the next action is obvious (we clarify immediately), so
    we want a =TODO= item by default, while in general we are just
    capturing information (potentially for later clarification

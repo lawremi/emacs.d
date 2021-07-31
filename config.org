@@ -167,8 +167,8 @@
    For syncing Google Calendar with an org-mode file.
    #+begin_src emacs-lisp
      (require 'org-gcal)
-     (setq org-gcal-client-id "706907592689-jhil8k3v8lpuod2b1323hcg5g2o993ud.apps.googleusercontent.com"
-           org-gcal-client-secret "7xygDl6RTtfb28qzj7Wt4EXw"
+     (setq org-gcal-client-id "811928425687-dsis7h0f5h6d3tltgfu8nkb3bdl8jd6g.apps.googleusercontent.com"
+           org-gcal-client-secret "pTCx7RAey4frNZdsxhzbTcpH"
            org-gcal-file-alist '(("michafla@gene.com" .  "~/org/gcal.org")))
    #+end_src
 
@@ -313,9 +313,6 @@
    #+end_src
    
 * Interface
-  :PROPERTIES:
-  :ID:       2ff9e6e7-1016-401d-a813-efeaffd47d44
-  :END:
   Emacs (on the desktop) provides the usual editor GUI, including a
   menubar, toolbar, scrollbar, etc. We don't need those.
   #+begin_src emacs-lisp
@@ -479,6 +476,8 @@
    (global-set-key [(super right)] 'move-end-of-line)
    (global-set-key [(super up)] 'beginning-of-buffer)
    (global-set-key [(super down)] 'end-of-buffer)
+   (global-set-key [(end)] 'move-end-of-line)
+   (global-set-key [(home)] 'back-to-indentation)
    #+end_src
 
    One area where Emacs feels somewhat archaic is its scrolling. When a
@@ -510,14 +509,7 @@
    #+begin_src emacs-lisp
    (global-set-key (kbd "C-l") 'goto-line)
    #+end_src
-   
-** Web
-   We bind a key to use the built-in Emacs web browser (EWW) to search
-   for a selected word:
-   #+begin_src emacs-lisp
-   (global-set-key (kbd "s-g") 'eww-search-words)
-   #+end_src
-   
+      
 * Rendering
   After finding the place, in the right file, we need to be able to
   see and understand the text in order to edit it. This requires a
@@ -686,12 +678,10 @@
 
    Bind search/clone for GitHub repositories:
    #+begin_src emacs-lisp
-   (define-key global-map [(super u)] 'github-search-clone-repo)
+   (define-key global-map [(super g)] 'github-search-clone-repo)
    #+end_src
 
-   Since the R repository does not use any ignore settings (not sure
-   why, but it is probably controversal), we bind "x" to hide all of
-   the unregistered generated files:
+   We bind "x" to hide unregistered (typically generated) files:
    #+begin_src emacs-lisp
    (add-hook 'vc-dir-mode-hook
           (lambda ()
@@ -864,13 +854,6 @@
    #+end_src
 
 ** Shell
-   For tasks where an actual terminal emulator is not needed, it is
-   often more seamless to use the native Emacs shell. The shell is
-   based on =comint= mode, which also manages R session buffers. This
-   integration enables execution of R sessions on remote host, via the
-   shell. We often create multiple shells, and name them to keep them
-   organized. We define a convenience for creating named shells and
-   bind it to a convenient key:
    #+begin_src emacs-lisp
      (defun create-shell ()
        "creates a shell with a given name"
@@ -879,6 +862,13 @@
          (shell (concat "*" shell-name "*"))))
      (global-set-key (kbd "M-t") 'create-shell)
    #+end_src
+   For tasks where an actual terminal emulator is not needed, it is
+   often more seamless to use the native Emacs shell. The shell is
+   based on =comint= mode, which also manages R session buffers. This
+   integration enables execution of R sessions on remote host, via the
+   shell. We often create multiple shells, and name them to keep them
+   organized. We define a convenience for creating named shells and
+   bind it to a convenient key:
 
    We customize some simple interactions:
    #+begin_src emacs-lisp
@@ -923,34 +913,6 @@
    encompassing TODO lists, spreadsheets, and polyglot literate
    programming. In fact, we wrote this init file in org-mode.
 
-   Org-mode defines many keybindings, some of which conflict with our
-   configuration. We simply clear many of them, and move others.
-   #+begin_src emacs-lisp
-     (defun mfl/org-hook ()
-       (interactive)
-       (local-unset-key [(meta down)])
-       (local-unset-key [(meta up)])
-       (local-unset-key [(shift ctrl up)])
-       (local-unset-key [(shift ctrl down)])
-       (local-unset-key [(shift up)])
-       (local-unset-key [(shift down)])
-       (local-unset-key [(shift return)])
-       (local-unset-key [(shift left)])
-       (local-unset-key [(shift right)])
-       (local-unset-key [(control left)])
-       (local-unset-key [(control right)])
-       (local-unset-key [(control shift left)])
-       (local-unset-key [(control shift right)])
-       (local-set-key [(super return)] 'org-table-copy-down)
-       (local-set-key [(super up)] 'org-backward-heading-same-level)
-       (local-set-key [(super down)] 'org-forward-heading-same-level)
-       (local-set-key (kbd "RET") 'org-return-indent)
-       (local-set-key [(shift meta up)] 'org-metaup)
-       (local-set-key [(shift meta down)] 'org-metadown)
-     )
-     (add-hook 'org-mode-hook 'mfl/org-hook)
-   #+end_src        
-
    Org-mode supports links between nodes, files, and everything else
    (it is very extensible).
    #+begin_src emacs-lisp
@@ -982,6 +944,11 @@
    #+begin_src emacs-lisp
      (require 'ox-latex)
      (require 'ox-md)
+   #+end_src
+
+   Enable shift selection:
+   #+begin_src emacs-lisp
+     (setq org-support-shift-select 'always)
    #+end_src
    
 ** Literate programming
@@ -1016,21 +983,6 @@
      (add-to-list 'org-latex-packages-alist '("" "minted"))
    #+end_src
    This requires having the minted package installed.
-   
-   Typing out code block headers can become tedious, so we define some
-   templates for languages we use often:
-   #+begin_src emacs-lisp
-     (defun mfl/babel-template-hook ()
-       (interactive)
-       (add-to-list 'org-structure-template-alist
-          '("r" "#+begin_src R\n?\n#+end_src" "<src lang=\"R\">\n\n</src>"))
-       (add-to-list 'org-structure-template-alist
-          '("l" "#+begin_src latex\n?\n#+end_src" "<src lang=\"latex\">\n\n</src>"))
-       (add-to-list 'org-structure-template-alist
-          '("e" "#+begin_src emacs-lisp\n?\n#+end_src" "<src lang=\"emacs-lisp\">\n\n</src>"))
-       )
-     (add-hook 'org-mode-hook 'mfl/babel-template-hook)
-   #+end_src
 
    Add QML and Scala support:
    #+begin_src emacs-lisp
@@ -1153,7 +1105,7 @@
    is a convenience for starting/resuming screen on a specified
    host. It also takes care of the double echoing problem.
    #+begin_src emacs-lisp
-     (defvar R-remote-host "rescomp.gene.com")
+     (defvar R-remote-host "rosalind.gene.com")
      (defvar R-remote-screen "R")
      (defun R-remote (&optional remote-host screen-name)
        "Connect to the remote-host's screen-name screen running R."
@@ -1162,10 +1114,11 @@
                      (read-from-minibuffer "R remote screen name: " R-remote-screen)))
        (pop-to-buffer (make-term (concat "R:" remote-host)
                                  "ssh" nil "-t" remote-host
-                                 "screen" "-c" "/dev/null"
-                                 "-D" "-r" screen-name))
+                                 "stach new -J" screen-name))
        ;; avoid echo of your commands
-       (process-send-string nil "system('stty -echo')\n")
+       (process-send-string nil "stty -echo\n")
+       (process-send-string nil "ml load R/tst\n")
+       (process-send-string nil "R\n")
        (ess-remote (process-name (get-buffer-process (current-buffer))) "R"))
    #+end_src
 
@@ -1205,6 +1158,8 @@
          "* TODO %?\n  %u\n")
         ("b" "Link-back Todo" entry (file "inbox.org")
          "* TODO %?\n  %a\n  %u\n")
+	("u" "Link Todo" entry (file "inbox.org")
+	 "* TODO [[%c][%?]] \n  %u\n")
         ("w" "Web" entry (file "inbox.org")
          "* TODO %?\n  %c\n  %u\n  #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n")
         ("p" "Chrome" entry (file "inbox.org")
@@ -1230,6 +1185,8 @@
        (lambda () (interactive) (org-capture nil "t")))
      (define-key global-map [(super b)]
        (lambda () (interactive) (org-capture nil "b")))
+     (define-key global-map [(super u)]
+       (lambda () (interactive) (org-capture nil "u")))
    #+end_src
 
    If we already know that an item relates to a project, we can use
@@ -1254,13 +1211,6 @@
    #+begin_src emacs-lisp
    (setq org-confirm-elisp-link-function nil)
    #+end_src
-   
-   And this keybinding will autocomplete project names for when we are
-   outside of a project:
-   #+begin_src emacs-lisp
-     (define-key global-map [(super p)]
-	'org-projectile-project-todo-completing-read)
-    #+end_src
    
     For collaborative projects, we need to integrate with external
     issue trackers. Issues and actions are not necessarily the same

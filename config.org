@@ -11,12 +11,9 @@
   In order to actually find useful packages, we need to configure the
   major repositories:
   #+begin_src emacs-lisp
-    (setq package-archives '(("MELPA" . "http://melpa.org/packages/")
+    (setq package-archives '(("MELPA" . "https://melpa.org/packages/")
                              ("gnu" . "http://elpa.gnu.org/packages/")
-                             ("marmalade" . "http://marmalade-repo.org/packages/")
-                             ("SC"   .
-                              "http://joseito.republika.pl/sunrise-commander/")
-                             ("org" . "http://orgmode.org/elpa/"))
+                             ("org" . "https://orgmode.org/elpa/"))
           )
   #+end_src
   

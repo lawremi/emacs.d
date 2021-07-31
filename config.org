@@ -94,7 +94,9 @@
    closing, etc.
 
    #+begin_src emacs-lisp
-     (projectile-global-mode)
+     (require 'projectile)
+     (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+     (projectile-mode +1)
      (setq projectile-completion-system 'helm)
      (setq projectile-enable-caching t)
    #+end_src

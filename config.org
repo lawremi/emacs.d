@@ -166,7 +166,6 @@
 ** org-gcal
    For syncing Google Calendar with an org-mode file.
    #+begin_src emacs-lisp
-     (require 'org-gcal)
      (setq org-gcal-client-id "811928425687-dsis7h0f5h6d3tltgfu8nkb3bdl8jd6g.apps.googleusercontent.com"
            org-gcal-client-secret "pTCx7RAey4frNZdsxhzbTcpH"
            org-gcal-file-alist '(("michafla@gene.com" .  "~/org/gcal.org")))
@@ -1140,9 +1139,9 @@
 
    We want to streamline entry for the most common ways we encounter
    stuff, including:
-   * As we think of something while reviewing a project,
-   * When we receive or think of something off-line (conversation),
-   * When we receive something by email, Slack or see something on the web.
+   * While reviewing a project,
+   * During a meeting or conversation,
+   * When communicating asynchronously, such as by email or Slack.
    Sometimes, the next action is obvious (we clarify immediately), so
    we want a =TODO= item by default, while in general we are just
    capturing information (potentially for later clarification
@@ -1176,6 +1175,8 @@
      (server-start)
      (require 'org-protocol)
    #+end_src
+   This is a little janky though, so we typically use the "u"
+   template, which just takes a link from the clipboard.
    
    Hook the (non-web) templates up to global keybindings:
    #+begin_src emacs-lisp
@@ -1244,9 +1245,10 @@
     =org-todo=. We define a number of different org TODO states, most
     of which will be explained later.
     #+begin_src emacs-lisp
-     (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w/!)" "SOMEDAY(s)"
-                                         "|" 
-                                         "DONE(d!)" "CANCELED(c@)")))
+      (setq org-todo-keywords
+	    '((sequence "TODO(t)" "WAITING(w/!)" "PROJECT(p)" "SOMEDAY(s)"
+			"|" 
+			"DONE(d!)" "CANCELED(c@)")))
     #+end_src
 
 *** Is it about a project (multi-step process)?
@@ -1281,8 +1283,16 @@
     and tag it with the person responsible.
 
     #+begin_src emacs-lisp
-      (setq org-tag-alist '(("Gabe" . ?G) ("Pete" . ?P) ("Matt" . ?M) ("1-on-1" . ?1)))
+      (setq org-tag-alist '(("Aaron" . ?A) ("Allison" . ?L) ("Altaf" . ?T)
+			    ("Bo" . ?B) ("Daryl" ?D) ("Hector" ?H) ("JP" ?J)
+			    ("Rena" ?R) ("Sebastien" ?S) ("Dana" ?N)
+			    ("@email", ?e))
     #+end_src
+
+    Note that we have a special @context tag for email (which also
+    includes other asynchronous forms of communication, like Slack),
+    because opening the inbox can be distracting, so we want to handle
+    all email communications in a single block of time.
     
 ** Organize
    In this stage, we:
@@ -1322,25 +1332,16 @@
    (define-key global-map [(super a)] 'org-agenda)
    #+end_src
    
-   On a daily basis, we want to reflect on the time-bound tasks and
-   next actions, separately. Time-bound tasks are best shown in a
-   calendar view, for which we use the calfw package, with the
-   org-agenda keybindings.
-   #+begin_src emacs-lisp
-     (require 'calfw-org)
-     (setq cfw:org-overwrite-default-keybinding t)
-     (define-key global-map [(super s)] 'cfw:open-org-calendar)
-     (setq cfw:org-agenda-schedule-args '(:timestamp))
-   #+end_src
-
    To get the entire schedule for the day, we need to import events
    from the Google Calendar, via the org-gcal package by executing
    =org-gcal-fetch=. We can run this in a timer to update our calendar
    every hour.
    #+begin_src emacs-lisp
-   (run-with-timer 0 (* 60 60) 'org-gcal-fetch)
+   ;(run-with-timer 0 (* 60 60) 'org-gcal-fetch)
    #+end_src
-
+   Disabled for now, because the token keeps expiring, and everything
+   goes haywire.
+   
    We want to keep things in context, so show days one week ahead
    of time:
    #+begin_src emacs-lisp
@@ -1354,20 +1355,26 @@
    addition to next actions.
    #+begin_src emacs-lisp
      (setq org-agenda-custom-commands
-           '(("n" "Next Actions"
-              ((todo "TODO"
-                     ((org-agenda-overriding-header "\Next Actions")
-                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled)))))
-              nil
-              nil)
-             ("w" "Weekly Review"
-              ((todo ""
-                     ((org-agenda-overriding-header "\Weekly Review")
-                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled)))))
-              nil
-              nil)))
+	   '(("n" "Next Actions" todo "TODO"
+	      ((org-agenda-overriding-header "Next Actions")))
+	     ("w" "Weekly Review" todo ""
+	      ((org-agenda-sorting-strategy '(todo-state-up priority-down))
+	       (org-agenda-overriding-header "Weekly Review")))
+	     ("e" "Email" tags-todo "@email"
+	      ((org-agenda-overriding-header "Email Actions")))
+	     )
+	   )
    #+end_src
 
+   In accordance with the job accountabilities listed below, we can
+   systematically review the following in order to capture everything
+   that matters:
+   * Direct reports :: how can we enable their development?
+   * Business objectives :: how can we better meet them?
+   * Project objectives :: how can we help them meet our business objectives?
+   * Personal projects :: how can we make a bigger personal impact?
+   * Calendar entries :: what to prepare for and what's emerging?
+   
 ** Engage
    Once we have reviewed the action landscape, we have to decide, on a
    moment-to-moment basis, which tasks to perform. There are some
@@ -1396,7 +1403,29 @@
     * Long-term goals (e.g., get promoted in a couple years)
     * Vision (where do you want to be in 5 years?)
     * Purpose (why am I here?)
-    
+
+    The current actions and goals are dynamic and tracked
+    elsewhere. Below, we describe the more distant horizons.
+ 
+**** Accountabilities
+     * Manage and develop my direct reports
+     * Lead my organization to meet our objectives
+     * Engage, at a high level, in scientific and engineering
+       activities
+       
+**** Long-term goals
+     * Improve my leadership and communication skills
+     * Build relationship capital both inside and outside of my company
+     * Proactively pursue roles with greater responsibility
+       
+**** Vision
+     To become a better and more influential leader both internal and
+     external to my employer.
+     
+**** Purpose
+     To be creative and to lead creative activities towards the
+     betterment of humanity.
+     
 ** Project planning
    When initiating (and reviewing) a project, we follow the "Natural
    Planning" process, as laid out below. All project materials should

@@ -17,3 +17,6 @@ src
 /SessionDesktop.el
 /tramp
 /url
+/image-dired/
+/transient/
+/.org-generic-id-locations

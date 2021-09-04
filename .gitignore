@@ -20,3 +20,5 @@ src
 /image-dired/
 /transient/
 /.org-generic-id-locations
+/persist/
+/request/

@@ -7,16 +7,6 @@
   details, such as particular key-bindings, are personal preferences.
 
 * Packages
-** Installation
-  In order to actually find useful packages, we need to configure the
-  major repositories:
-  #+begin_src emacs-lisp
-    (setq package-archives '(("MELPA" . "https://melpa.org/packages/")
-                             ("gnu" . "http://elpa.gnu.org/packages/")
-                             ("org" . "https://orgmode.org/elpa/"))
-          )
-  #+end_src
-  
   The following describes each package we have installed.
   
 ** Helm
@@ -26,7 +16,6 @@
 
    #+begin_src emacs-lisp
      (require 'helm)
-     (require 'helm-config)
    #+end_src
 
    Enable helm for "everything":
@@ -308,7 +297,7 @@
                  (when (string-equal "tsx" (file-name-extension buffer-file-name))
                    (setup-tide-mode))))
      ;; enable typescript-tslint checker
-     (flycheck-add-mode 'typescript-tslint 'web-mode)
+     ;(flycheck-add-mode 'typescript-tslint 'web-mode)
    #+end_src
    
 * Interface
@@ -515,11 +504,9 @@
   clean theme, as well as language-specific features like syntax
   highlighting.
 
-  Enable the Solarized "dark" theme ("light" is equally good):
+  Enable the modus vivendi "dark" theme:
   #+begin_src emacs-lisp
-    (if (memq window-system '(mac ns))
-        (load-theme 'solarized-dark t)
-      (load-theme 'solarized-light t))
+    (load-theme 'modus-vivendi)
   #+end_src
   
   Enable syntax-highlighting:
@@ -536,8 +523,8 @@
   Configure the font:
   #+begin_src emacs-lisp
     (if (memq window-system '(mac ns))
-        (set-default-font "Menlo-14")
-      (set-default-font "Bitstream Vera Sans Mono-11"))
+        (set-frame-font "Menlo-14")
+      (set-frame-font "Bitstream Vera Sans Mono-11"))
   #+end_src
 
   Show matching parentheses:
@@ -1013,7 +1000,6 @@
    We disable some of the annoying features of ESS:
    #+begin_src emacs-lisp
      (setq ess-ask-for-ess-directory nil)
-     (ess-toggle-underscore nil)
      (defun no-process-query-hook ()
        (set-process-query-on-exit-flag (get-buffer-process (current-buffer)) nil))
      (add-hook 'ess-post-run-hook 'no-process-query-hook)
@@ -1283,9 +1269,9 @@
     and tag it with the person responsible.
 
     #+begin_src emacs-lisp
-      (setq org-tag-alist '(("Aaron" . ?A) ("Allison" . ?L) ("Altaf" . ?T)
-			    ("Bo" . ?B) ("Daryl" ?D) ("Hector" ?H) ("JP" ?J)
-			    ("Rena" ?R) ("Sebastien" ?S) ("Dana" ?N)
+      (setq org-tag-alist '(("Aaron" . ?A) ("Altaf" . ?T)
+			    ("Max" ?M) ("Patrick" ?P) ("Adrian" ?D)
+			    ("Sebastien" ?S) ("Pauline" ?U)
 			    ("@email", ?e))
     #+end_src
 

@@ -1,7 +1,26 @@
 ;;; init.el --- Loads configuration in config.org
 ;;
 
-(package-initialize)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(exec-path-from-shell solarized-theme flycheck diff-hl ess poly-R multi-term smooth-scrolling web-mode org-ref github-search org-projectile-helm helm-org org-projectile helm-projectile wgrep-helm helm org-dotemacs)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+(require 'package)
+(setq package-archives '(("MELPA" . "https://melpa.org/packages/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/"))
+      )
+(package-install-selected-packages)
 
 (require 'org-dotemacs)
 (setq org-dotemacs-default-file "~/.emacs.d/config.org")

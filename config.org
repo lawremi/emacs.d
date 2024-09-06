@@ -1011,7 +1011,7 @@
        (interactive)
        (if (and transient-mark-mode mark-active)
            (call-interactively 'ess-eval-region)
-         (ess-eval-line-and-step t nil nil)))
+         (ess-eval-line-and-step nil)))
      (global-set-key [(shift return)] 'my-ess-eval)
    #+end_src
 
@@ -1113,6 +1113,40 @@
        (ess-set-style 'RStudio)
        (setq ess-indent-offset 4))
      (add-hook 'ess-mode-hook 'indent-ess-hook)
+   #+end_src
+
+   Shortcut for quitting R without saving the session and closing the buffer:
+   #+begin_src emacs-lisp
+     (defun my-ess-quit-no-save ()
+       "Quit the ESS R session without saving, wait, then kill the buffer."
+       (interactive)
+       (set-process-sentinel
+	(ess-get-process ess-local-process-name)
+	(lambda (process event)
+	  (ess-process-sentinel process event) ; Run ESS’s own sentinel.
+	  (and (memq (process-status process) '(exit signal))
+	       (buffer-live-p (process-buffer process))
+	       (kill-buffer (process-buffer process)))))
+       (ess-quit t))
+     (add-hook 'inferior-ess-r-mode-hook
+	   (lambda ()
+	     (local-set-key (kbd "C-w") 'my-ess-quit-no-save)))
+   #+end_src
+
+   And for quitting R from the associated code buffer:
+   #+begin_src emacs-lisp
+     (defun my-ess-quit-no-save-external ()
+       "Quit the ESS R session from an associated R code buffer"
+       (interactive)
+       (let ((process-buffer (ess-get-process-buffer)))
+	 (if (and process-buffer (buffer-live-p process-buffer))
+	     (with-current-buffer process-buffer
+	       (my-ess-quit-no-save))
+	   (message "No associated R process buffer found or buffer is not live")
+	   )))
+     (add-hook 'ess-r-mode-hook
+	       (lambda ()
+		 (local-set-key (kbd "C-e") 'my-ess-quit-no-save-external)))
    #+end_src
    
 * Getting things done

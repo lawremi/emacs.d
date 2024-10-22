@@ -1009,9 +1009,11 @@
    #+begin_src emacs-lisp
      (defun my-ess-eval ()
        (interactive)
+       (ess-switch-to-inferior-or-script-buffer nil)
+       (ess-switch-to-inferior-or-script-buffer nil)
        (if (and transient-mark-mode mark-active)
-           (call-interactively 'ess-eval-region)
-         (ess-eval-line-and-step nil)))
+	   (call-interactively 'ess-eval-region)
+	 (ess-eval-line-and-step nil)))
      (global-set-key [(shift return)] 'my-ess-eval)
    #+end_src
 
